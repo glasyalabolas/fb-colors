@@ -1,52 +1,32 @@
 #include once "fbgfx.bi"
 #include once "inc/fb-colors.bi"
 
-/'
-  Base class for a color theme
-'/
+'' Base class for a color theme
 type ColorThemeBase extends Object
   public:
     declare virtual destructor()
     
-    declare property _
-      swatches() as integer
-    declare property _
-      swatch( _
-        byval as integer ) as Colors.float3
-      
-    declare abstract function _
-      generate( _
-        byval as integer ) as ColorThemeBase ptr
-      
+    declare property swatches() as integer
+    declare property swatch( as integer ) as Colors.float3
+    
+    declare abstract function generate( as integer ) as ColorThemeBase ptr
+    
   protected:
     declare constructor()
     
-    as integer _
-      m_swatchCount
-    as Colors.HCYColor _
-      m_swatches( any )
+    as integer m_swatchCount
+    as Colors.HCYColor m_swatches( any )
 end type
 
-constructor _
-  ColorThemeBase()
-end constructor
+constructor ColorThemeBase() : end constructor
 
-destructor _
-  ColorThemeBase()
-end destructor
+destructor ColorThemeBase() : end destructor
 
-property _
-  ColorThemeBase.swatches() _
-  as integer
-  
+property ColorThemeBase.swatches() as integer
   return( m_swatchCount )
 end property
 
-property _
-  ColorThemeBase.swatch( _
-    byval index as integer ) _
-  as Colors.float3
-  
+property ColorThemeBase.swatch( index as integer ) as Colors.float3
   return( m_swatches( index ) )
 end property
 
@@ -59,44 +39,25 @@ type RandomTheme extends ColorThemeBase
     declare constructor()
     declare destructor() override
     
-    declare property _
-      baseColor() as Colors.float3
-      
-    declare function _
-      withBaseColor( _
-        byref as Colors.HCYColor ) _
-      as RandomTheme ptr
-    declare function _
-      generate( _
-        byval as integer ) as RandomTheme ptr override
-      
+    declare property baseColor() as Colors.float3
+    
+    declare function withBaseColor( as Colors.HCYColor ) as RandomTheme ptr
+    declare function generate( as integer ) as RandomTheme ptr override
+    
   private:
-    as Colors.float3 _
-      m_baseColor
+    as Colors.float3 m_baseColor
 end type
 
-constructor _
-  RandomTheme()
-end constructor
+constructor RandomTheme() : end constructor
 
-destructor _
-  RandomTheme()
-end destructor
+destructor RandomTheme() : end destructor
 
-property _
-  RandomTheme.baseColor() _
-  as Colors.float3
-  
+property RandomTheme.baseColor() as Colors.float3
   return( m_baseColor )
 end property
 
-function _
-  RandomTheme.withBaseColor( _
-    byref aBaseColor as Colors.HCYColor ) _
-  as RandomTheme ptr
-  
-  m_baseColor => aBaseColor
-  
+function RandomTheme.withBaseColor( aBaseColor as Colors.HCYColor ) as RandomTheme ptr
+  m_baseColor = aBaseColor
   return( @this )
 end function
 
@@ -107,24 +68,15 @@ end function
   methods to generate several uniformly distributed random
   colors.
 '/
-function _
-  RandomTheme.generate( _
-    byval swatchCount as integer ) _
-  as RandomTheme ptr
+function RandomTheme.generate( swatchCount as integer ) as RandomTheme ptr
+  m_swatchCount = swatchCount
   
-  m_swatchCount => swatchCount
+  redim m_swatches( 0 to m_swatchCount - 1 )
   
-  redim _
-    m_swatches( 0 to m_swatchCount - 1 )
-  
-  for _
-    i as integer => 0 to m_swatchCount - 1
-    
-    m_swatches( i ) => Colors.HCYColor( _
-      Colors.wrap( _
-        m_baseColor.x + Colors.invPhi * i, 0.0, 1.0 ), _
-      Colors.wrap( _
-        m_baseColor.y + Colors.invPhi * i, 0.0, 1.0 ), _
+  for i as integer = 0 to m_swatchCount - 1
+    m_swatches( i ) = Colors.HCYColor( _
+      Colors.wrap( m_baseColor.x + Colors.invPhi * i, 0.0, 1.0 ), _
+      Colors.wrap( m_baseColor.y + Colors.invPhi * i, 0.0, 1.0 ), _
       m_baseColor.z )
   next
   
@@ -142,20 +94,17 @@ type RandomThemeHarmonics extends ColorThemeBase
     
     declare function _
       withParameters( _
-        byval as Colors.float, _
-        byval as Colors.float, _
-        byval as Colors.float, _
-        byval as Colors.float, _
-        byval as Colors.float, _
-        byval as Colors.float, _
-        byval as Colors.float ) _
+        as Colors.float, _
+        as Colors.float, _
+        as Colors.float, _
+        as Colors.float, _
+        as Colors.float, _
+        as Colors.float, _
+        as Colors.float ) _
       as RandomThemeHarmonics ptr
       
-    declare function _
-      generate( _
-        byval as integer ) _
-      as RandomThemeHarmonics ptr
-      
+    declare function generate( as integer ) as RandomThemeHarmonics ptr
+    
   private:
     as Colors.float _
       m_offsetAngle1, _
@@ -167,66 +116,52 @@ type RandomThemeHarmonics extends ColorThemeBase
       m_luminance
 end type
 
-constructor _
-  RandomThemeHarmonics()
-end constructor
+constructor RandomThemeHarmonics() : end constructor
 
-destructor _
-  RandomThemeHarmonics()
-end destructor
+destructor RandomThemeHarmonics() : end destructor
 
-function _
-  RandomThemeHarmonics.withParameters( _
-    byval anOffsetAngle1 as Colors.float, _
-    byval anOffsetAngle2 as Colors.float, _
-    byval aRangeAngle0 as Colors.float, _
-    byval aRangeAngle1 as Colors.float, _
-    byval aRangeAngle2 as Colors.float, _
-    byval aSaturation as Colors.float, _
-    byval aLuminance as Colors.float ) _
+function RandomThemeHarmonics.withParameters( _
+    anOffsetAngle1 as Colors.float, _
+    anOffsetAngle2 as Colors.float, _
+    aRangeAngle0 as Colors.float, _
+    aRangeAngle1 as Colors.float, _
+    aRangeAngle2 as Colors.float, _
+    aSaturation as Colors.float, _
+    aLuminance as Colors.float ) _
   as RandomThemeHarmonics ptr
   
-  m_offsetAngle1 => anOffsetAngle1
-  m_offsetAngle2 => anOffsetAngle2
-  m_rangeAngle0 => aRangeAngle0
-  m_rangeAngle1 => aRangeAngle1
-  m_rangeAngle2 => aRangeAngle2
-  m_saturation => aSaturation
-  m_luminance => aLuminance
+  m_offsetAngle1 = anOffsetAngle1
+  m_offsetAngle2 = anOffsetAngle2
+  m_rangeAngle0 = aRangeAngle0
+  m_rangeAngle1 = aRangeAngle1
+  m_rangeAngle2 = aRangeAngle2
+  m_saturation = aSaturation
+  m_luminance = aLuminance
   
   return( @this )
 end function
 
-function _
-  RandomThemeHarmonics.generate( _
-    byval swatchCount as integer ) _
-  as RandomThemeHarmonics ptr
+function RandomThemeHarmonics.generate( swatchCount as integer ) as RandomThemeHarmonics ptr
+  m_swatchCount = swatchCount
   
-  m_swatchCount => swatchCount
+  redim m_swatches( 0 to m_swatchCount - 1 )
   
-  redim _
-    m_swatches( 0 to m_swatchCount - 1 )
+  dim as Colors.float referenceAngle = rnd() * 360.0
   
-  dim as Colors.float _
-    referenceAngle => rnd() * 360.0
-  
-  for _
-    i as integer => 0 to m_swatchCount - 1
-    
+  for i as integer = 0 to m_swatchCount - 1
     dim as Colors.float _
-      randomAngle => rnd() * ( m_rangeAngle0 + m_rangeAngle1 + m_rangeAngle2 )
+      randomAngle = rnd() * ( m_rangeAngle0 + m_rangeAngle1 + m_rangeAngle2 )
     
     if( randomAngle > m_rangeAngle0 ) then
       if( randomAngle < m_rangeAngle0 + m_rangeAngle1 ) then
-        randomAngle +=> m_offsetAngle1
+        randomAngle += m_offsetAngle1
       else
-        randomAngle +=> m_offsetAngle2
+        randomAngle += m_offsetAngle2
       end if
     end if
     
-    m_swatches( i ) => Colors.HCYColor( _
-      Colors.wrap( _
-        ( referenceAngle + randomAngle ) / 360.0, 0.0, 1.0 ), _
+    m_swatches( i ) = Colors.HCYColor( _
+      Colors.wrap( ( referenceAngle + randomAngle ) / 360.0, 0.0, 1.0 ), _
       m_saturation, _
       m_luminance )
   next
@@ -242,89 +177,62 @@ type TriadMixingColorTheme extends ColorThemeBase
     declare constructor()
     declare destructor() override
     
-    declare function _
-      withColors( _
-        byref as Colors.HCYColor, _
-        byref as Colors.HCYColor, _
-        byref as Colors.HCYColor ) _
+    declare function withColors( _
+        as Colors.HCYColor, _
+        as Colors.HCYColor, _
+        as Colors.HCYColor ) _
       as TriadMixingColorTheme ptr
-    declare function _
-      withParameters( _
-        byval as Colors.float ) _
-      as TriadMixingColorTheme ptr
-    declare function _
-      generate( _
-        byval as integer ) _
-      as TriadMixingColorTheme ptr override
+    declare function withParameters( as Colors.float ) as TriadMixingColorTheme ptr
+    declare function generate( as integer ) as TriadMixingColorTheme ptr override
     
   private:
     as Colors.HCYColor _
       m_color1, m_color2, m_color3
-    as Colors.float _
-      m_greyControl
+    as Colors.float m_greyControl
 end type
 
-constructor _
-  TriadMixingColorTheme()
-end constructor
+constructor TriadMixingColorTheme() : end constructor
 
-destructor _
-  TriadMixingColorTheme()
-end destructor
+destructor TriadMixingColorTheme() : end destructor
 
-function _
-  TriadMixingColorTheme.withColors( _
-    byref color1 as Colors.HCYColor, _
-    byref color2 as Colors.HCYColor, _
-    byref color3 as Colors.HCYColor ) _
+function TriadMixingColorTheme.withColors( _
+    color1 as Colors.HCYColor, _
+    color2 as Colors.HCYColor, _
+    color3 as Colors.HCYColor ) _
   as TriadMixingColorTheme ptr
   
-  m_color1 => color1
-  m_color2 => color2
-  m_color3 => color3
+  m_color1 = color1
+  m_color2 = color2
+  m_color3 = color3
   
   return( @this )
 end function
 
-function _
-  TriadMixingColorTheme.withParameters( _
-    byval greyControl as Colors.float ) _
-  as TriadMixingColorTheme ptr
-  
-  m_greyControl => greyControl
+function TriadMixingColorTheme.withParameters( greyControl as Colors.float ) as TriadMixingColorTheme ptr
+  m_greyControl = greyControl
   
   return( @this )
 end function
 
-function _
-  TriadMixingColorTheme.generate( _
-    byval swatchCount as integer ) _
-  as TriadMixingColorTheme ptr
+function TriadMixingColorTheme.generate( swatchCount as integer ) as TriadMixingColorTheme ptr
+  m_swatchCount = swatchCount
   
-  m_swatchCount => swatchCount
+  redim m_swatches( 0 to m_swatchCount - 1 )
   
-  redim _
-    m_swatches( 0 to m_swatchCount - 1 )
-  
-  for _
-    i as integer => 0 to m_swatchCount - 1
-    dim as integer _
-      randomIndex => rnd() * 2
+  for i as integer = 0 to m_swatchCount - 1
+    dim as integer randomIndex = rnd() * 2
     
     dim as Colors.float _
-      mixRatio1 => iif( randomIndex = 0, _
-        rnd() * m_greyControl, rnd() ), _
-      mixRatio2 => iif( randomIndex = 1, _
-        rnd() * m_greyControl, rnd() ), _
-      mixRatio3 => iif( randomIndex = 2, _
-        rnd() * m_greyControl, rnd() ), _
-      sum => mixRatio1 + mixRatio2 + mixRatio3
+      mixRatio1 = iif( randomIndex = 0, rnd() * m_greyControl, rnd() ), _
+      mixRatio2 = iif( randomIndex = 1, rnd() * m_greyControl, rnd() ), _
+      mixRatio3 = iif( randomIndex = 2, rnd() * m_greyControl, rnd() ), _
+      sum = mixRatio1 + mixRatio2 + mixRatio3
     
-    mixRatio1 /=> sum
-    mixRatio2 /=> sum
-    mixRatio3 /=> sum
+    mixRatio1 /= sum
+    mixRatio2 /= sum
+    mixRatio3 /= sum
     
-    m_swatches( i ) => Colors.HCYColor( _
+    m_swatches( i ) = Colors.HCYColor( _
       mixRatio1 * m_color1.x + mixRatio2 * m_color2.x + mixRatio3 * m_color3.x, _
       mixRatio1 * m_color1.y + mixRatio2 * m_color2.y + mixRatio3 * m_color3.y, _
       mixRatio1 * m_color1.z + mixRatio2 * m_color2.z + mixRatio3 * m_color3.z )
@@ -333,37 +241,27 @@ function _
   return( @this )
 end function
 
-/'
-  Draws a color swatch
-'/
-sub _
-  drawSwatch( _
-    byval x as integer, _
-    byval y as integer, _
-    byval swatchWidth as integer, _
-    byval swatchHeight as integer, _
-    byref aColor as Colors.HCYColor )
+'' Draws a color swatch
+sub drawSwatch( _
+  x as integer, _
+  y as integer, _
+  swatchWidth as integer, _
+  swatchHeight as integer, _
+  aColor as Colors.HCYColor )
   
-  line _
-    ( x, y ) - _
-    ( x + swatchWidth - 1, y + swatchHeight - 1 ), _
+  line ( x, y ) - ( x + swatchWidth - 1, y + swatchHeight - 1 ), _
     Colors.HCYtoRGB( aColor ), bf
 end sub
 
-/'
-  Draws all color swatches from the specified Color Theme
-'/
-sub _
-  drawSwatches( _
-    byval x as integer, _
-    byval y as integer, _
-    byval swatchWidth as integer, _
-    byval swatchHeight as integer, _
-    byval aColorTheme as ColorThemeBase ptr )
+'' Draws all color swatches from the specified Color Theme
+sub drawSwatches( _
+  x as integer, _
+  y as integer, _
+  swatchWidth as integer, _
+  swatchHeight as integer, _
+  aColorTheme as ColorThemeBase ptr )
   
-  for _
-    x as integer => 0 to aColorTheme->swatches - 1
-    
+  for x as integer = 0 to aColorTheme->swatches - 1
     drawSwatch( _
       x * swatchWidth + 2, y, _
       swatchWidth, swatchHeight, _
@@ -375,73 +273,60 @@ end sub
   Example 2: Generating random colors
 '/
 dim as integer _
-  displayWidth => 800, _
-  displayHeight => 600
+  displayWidth = 800, _
+  displayHeight = 600
 
-screenRes( _
-  displayWidth, displayHeight, _
-  32 )
-color( _
-  rgb( 0, 0, 0 ), _
-  rgb( 255, 255, 255 ) )
-width _
-  displayWidth \ 8, _
-  displayHeight \ 16
+screenRes( displayWidth, displayHeight, 32 )
+color( rgb( 0, 0, 0 ), rgb( 255, 255, 255 ) )
+width displayWidth \ 8, displayHeight \ 16
 cls()
 
 windowTitle( "Example 2: Random color generation (<SPACE> generates new swatches)" )
 
 randomize()
 
-dim as string _
-  keyPressed
+dim as string keyPressed
 
 dim as integer _
-  swatchWidth => 30, _
-  swatchHeight => 70, _
-  numSwatches => 20
+  swatchWidth = 30, _
+  swatchHeight = 70, _
+  numSwatches = 20
   
-var aRandomTheme => _
-  new RandomTheme() _
-    ->withBaseColor( Colors.HCYColor( 0.2, 0.8, 0.5 ) ) _
-    ->generate( numSwatches )
+var aRandomTheme = new RandomTheme() _
+  ->withBaseColor( Colors.HCYColor( 0.2, 0.8, 0.5 ) ) _
+  ->generate( numSwatches )
   
-var aRandomThemeHarmonics => _
-  new RandomThemeHarmonics() _
-    ->withParameters( _
-      120.0, _
-      240.0, _
-      rnd() * 360.0, _
-      0.0, _
-      0.0, _
-      rnd(), rnd() ) _
-    ->generate( numSwatches )
+var aRandomThemeHarmonics = new RandomThemeHarmonics() _
+  ->withParameters( _
+    120.0, _
+    240.0, _
+    rnd() * 360.0, _
+    0.0, _
+    0.0, _
+    rnd(), rnd() ) _
+  ->generate( numSwatches )
 
-var aTriadMixingTheme => _
-  new TriadMixingColorTheme() _
-    ->withColors( _
-      Colors.HCYColor( rnd(), rnd(), rnd() ), _
-      Colors.HCYColor( rnd(), rnd(), rnd() ), _
-      Colors.HCYColor( rnd(), rnd(), rnd() ) ) _
-    ->withParameters( rnd() ) _
-    ->generate( numSwatches )
+var aTriadMixingTheme = new TriadMixingColorTheme() _
+  ->withColors( _
+    Colors.HCYColor( rnd(), rnd(), rnd() ), _
+    Colors.HCYColor( rnd(), rnd(), rnd() ), _
+    Colors.HCYColor( rnd(), rnd(), rnd() ) ) _
+  ->withParameters( rnd() ) _
+  ->generate( numSwatches )
 
 do
   keyPressed = inkey()
   
   if( keyPressed = chr( 32 ) ) then
-    aRandomTheme _
-      ->withBaseColor( Colors.HCYColor( _
-        rnd(), rnd(), rnd() ) ) _
+    aRandomTheme->withBaseColor( Colors.HCYColor( rnd(), rnd(), rnd() ) ) _
       ->generate( numSwatches )
     
     dim as Colors.float _
-      range0 => rnd() * 360.0, _
-      range1 => rnd() * 5.0, _
-      range2 => rnd() * 5.0
+      range0 = rnd() * 360.0, _
+      range1 = rnd() * 5.0, _
+      range2 = rnd() * 5.0
     
-    aRandomThemeHarmonics _
-      ->withParameters( _
+    aRandomThemeHarmonics->withParameters( _
         180.0 + rnd() * 10.0, _
         180.0 - rnd() * 10.0, _
         range0, _
@@ -450,8 +335,7 @@ do
         rnd(), 0.5 ) _
       ->generate( numSwatches )
     
-    aTriadMixingTheme _
-      ->withColors( _
+    aTriadMixingTheme->withColors( _
         Colors.HCYColor( rnd(), rnd(), rnd() ), _
         Colors.HCYColor( rnd(), rnd(), rnd() ), _
         Colors.HCYColor( rnd(), rnd(), rnd() ) ) _
@@ -462,10 +346,7 @@ do
   screenLock()
     cls()
     
-    drawSwatches( _
-      0, 0, _
-      swatchWidth, swatchHeight, _
-      aRandomTheme )
+    drawSwatches( 0, 0, swatchWidth, swatchHeight, aRandomTheme )
     drawSwatches( _
       0, 1 * ( swatchHeight + 4 ), _
       swatchWidth, swatchHeight, _
@@ -477,10 +358,7 @@ do
   screenUnlock()
   
   sleep( 1, 1 )
-loop _
-  until( _
-    keyPressed = chr( 27 ) orElse _
-    keyPressed = chr( 255 ) + "k" )
+loop until( keyPressed = chr( 27 ) orElse keyPressed = chr( 255 ) + "k" )
 
 delete( aTriadMixingTheme )
 delete( aRandomThemeHarmonics )
