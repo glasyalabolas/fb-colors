@@ -21,57 +21,53 @@
   convert them first, like this:
   
   '' Mix two HCY colors in equal amounts
-  finalColor = Colors.mix( _
-    Colors.HCYtoRGB( color1 ), _
-    Colors.HCYtoRGB( color2 ), _
-    0.5 )
+  finalColor = Colors.mix( Colors.HCYtoRGB( color1 ), Colors.HCYtoRGB( color2 ), 0.5 )
+  
+  Port of:
+    https://www.chilliant.com/rgb2hsv.html
 '/
 namespace Colors
   type as double float
   
   const as float _
-    epsilon = 1e-10f, _
-    phi = ( 1.0f + sqr( 5.0f ) ) / 2.0f, _
-    invPhi = 1.0f / phi
+    epsilon = 1e-10, _
+    phi = ( 1.0 + sqr( 5.0 ) ) / 2.0, _
+    invPhi = 1.0 / phi
   
-  /'
-    This is used to modulo-divide a floating point value. Useful
-    because FreeBasic's MOD operator works only with integer types.
-  '/
-  function fmod( n as float, d as float ) as float
+  '' This is used to modulo-divide a floating point value. Useful
+  '' because FreeBasic's MOD operator works only with integer types.
+  function fmod overload( n as float, d as float ) as float
     return( n - int( n / d ) * d )
   end function
   
   '' Select the minimum of two values
-  function min( a as float, b as float ) as float
+  function min overload( a as float, b as float ) as float
     return( iif( a < b, a, b ) )
   end function
   
   '' Select the maximum of two values
-  function max( a as float, b as float ) as float
+  function max overload( a as float, b as float ) as float
     return( iif( a > b, a, b ) )
   end function
   
   '' Clamps a value 'v' between two values, 'a' and 'b'
-  function clamp( v as float, a as float, b as float ) as float
+  function clamp overload( v as float, a as float, b as float ) as float
     return( max( a, min( v, b ) ) )
   end function
   
   '' Wraps a value 'v' between two values, 'a' and 'b'
-  function wrap( v as float, a as float, b as float ) as float
+  function wrap overload( v as float, a as float, b as float ) as float
     return( fmod( ( fmod( ( v - a ), ( b - a ) ) + ( b - a  ) ), ( b - a ) + a ) )
   end function
   
-  /'
-    A tuple of 3 floats. Also used to store a tuple of RGB
-    colors.
-  '/
+  '' A tuple of 3 floats. Also used to store a tuple of RGB
+  '' colors.
   type float3
     declare constructor()
     declare constructor( as float, as float, as float )
-    declare constructor( byref as float3 )
+    declare constructor( as float3 )
     
-    declare operator let( byref as float3 )
+    declare operator let( as float3 )
     
     declare property r() as float
     declare property r( as float )
@@ -94,16 +90,12 @@ namespace Colors
     x = nX : y = nY : z = nZ
   end constructor
   
-  constructor float3( byref rhs as float3 )
-    with rhs
-      x = .x : y = .y : z = .z
-    end with
+  constructor float3( rhs as float3 )
+    x = rhs.x : y = rhs.y : z = rhs.z
   end constructor
   
-  operator float3.let( byref rhs as float3 )
-    with rhs
-      x = .x : y = .y : z = .z
-    end with
+  operator float3.let( rhs as float3 )
+    x = rhs.x : y = rhs.y : z = rhs.z
   end operator
   
   property float3.r() as float
@@ -138,7 +130,7 @@ namespace Colors
   end operator
   
   '' Just the standard dot product
-  function dot overload( byref v as const float3, byref w as const float3 ) as float
+  function dot overload( v as const float3, w as const float3 ) as float
   	return( v.x * w.x + v.y * w.y + v.z * w.z )
   end function  
   
@@ -147,9 +139,9 @@ namespace Colors
     declare constructor()
     declare constructor( as float, as float, as float, as float = 1.0 )
     declare constructor( as float3, as float )
-    declare constructor( byref as float4 )
+    declare constructor( as float4 )
     
-    declare operator let( byref as float4 )
+    declare operator let( as float4 )
     
     declare property r() as float
     declare property r( as float )
@@ -174,24 +166,16 @@ namespace Colors
     x = nX : y = nY : z = nZ : w = nW
   end constructor
   
-  constructor float4( aFloat3 as float3, nA as float )
-    with aFloat3
-      x = .x : y = .y : z = .z
-    end with
-    
-    a = nA
+  constructor float4( nf as float3, nA as float )
+    x = nf.x : y = nf.y : z = nf.z : a = nA
   end constructor
   
-  constructor float4( byref rhs as Float4 )
-    with rhs
-      x = .x : y = .y : z = .z : a = .a
-    end with
+  constructor float4( rhs as float4 )
+    x = rhs.x : y = rhs.y : z = rhs.z : a = rhs.w
   end constructor
   
-  operator float4.let( byref rhs as float4 )
-    with rhs
-      x = .x : y = .y : z = .z : w = .w
-    end with
+  operator float4.let( rhs as float4 )
+    x = rhs.x : y = rhs.y : z = rhs.z : w = rhs.w
   end operator
   
   property float4.r() as float
@@ -219,11 +203,11 @@ namespace Colors
   end property
   
   property float4.a() as float
-    return( a )
+    return( w )
   end property
   
   property float4.a( value as float )
-    a = value
+    w = value
   end property
   
   operator float4.cast() as ulong
@@ -234,19 +218,6 @@ namespace Colors
       ( cubyte( a * 255 ) shl 24 ) )
   end operator
   
-  /'
-    Saturates a color such that:
-      0 <= x <= 1
-      0 <= y <= 1
-      0 <= z <= 1
-  '/
-  function saturate( aTuple as float3 ) as float3
-    return( float3( _
-      clamp( aTuple.x, 0.0, 1.0 ), _
-      clamp( aTuple.y, 0.0, 1.0 ), _
-      clamp( aTuple.z, 0.0, 1.0 ) ) )
-  end function
-  
   '' Convert pure Hue to RGB
   function hueToRGB( h as float ) as float3
     dim as float _
@@ -254,7 +225,31 @@ namespace Colors
       g = 2.0 - abs( h * 6.0 - 2.0 ), _
       b = 2.0 - abs( h * 6.0 - 4.0 )
     
-    return( saturate( float3( r, g, b ) ) )
+    return( ( float3( _
+      clamp( r, 0.0, 1.0 ), _
+      clamp( g, 0.0, 1.0 ), _
+      clamp( b, 0.0, 1.0 ) ) ) )
+  end function
+  
+  const as double _
+    _CD23 = 2.0 / 3.0, _
+    _CDM13 = -1.0 / 3.0
+  
+  '' Convert RGB to Hue/Chroma/Value
+  function RGBtoHCV( aRGB as float3 ) as float3
+    var _
+      P = iif( aRGB.g < aRGB.b, _
+        float4( aRGB.b, aRGB.g, -1.0, _CD23 ), _
+        float4( aRGB.g, aRGB.b, 0.0, _CDM13 ) ), _
+      Q = iif( aRGB.r < P.x, _
+        float4( P.x, P.y, P.w, aRGB.r ), _
+        float4( aRGB.r, P.y, P.z, P.x ) )
+      
+    dim as float _
+      C = Q.x - min( Q.w, Q.y ), _
+      H = abs( ( Q.w - Q.y ) / ( 6.0 * C + Epsilon ) + Q.z )
+    
+    return( float3( H, C, Q.x ) )
   end function
   
   '' Convert Hue-Saturation-Value to RGB
@@ -282,13 +277,13 @@ namespace Colors
     The weights of RGB contributions to luminance.
     Should sum to unity.  
   '/
-  dim as const float3 HCYweights = float3( 0.299, 0.587, 0.114 )
+  dim as const float3 _HCYweights = float3( 0.299, 0.587, 0.114 )
   
   '' Convert Hue-Chroma-Luminance to RGB
   function HCYtoRGB( byval HCY as float3 ) as float3
     var aRGB = hueToRGB( HCY.x )
     
-    dim as float Z = dot( aRGB, HCYweights )
+    dim as float Z = dot( aRGB, _HCYweights )
     
     if( HCY.z < Z ) then
       HCY.y *= HCY.z / Z
@@ -302,38 +297,21 @@ namespace Colors
       ( aRGB.z - Z ) * HCY.Y + HCY.z ) )
   end function
   
-  '' Convert RGB to Hue/Chroma/Value
-  function RGBtoHCV( aRGB as float3 ) as float3
-    var _
-      P = iif( aRGB.b < aRGB.b, _
-        float4( aRGB.b, aRGB.g, -1.0, 2.0 / 3.0 ), _
-        float4( aRGB.g, aRGB.b, 0.0, -1.0 / 3.0 ) ), _
-      Q = iif( aRGB.r < P.x, _
-        float4( P.x, P.y, P.w, aRGB.r ), _
-        float4( aRGB.r, P.y, P.z, P.x ) )
-      
-    dim as float _
-      C = Q.x - min( Q.w, Q.y ), _
-      H = abs( ( Q.w - Q.y ) / ( 6.0 * C + Epsilon ) + Q.z )
-    
-    return( float3( H, C, Q.x ) )
-  end function
-  
   '' Converting RGB to Hue-Chroma-Luminance
   function RGBtoHCY( aRGB as float3 ) as float3
     var HCV = RGBtoHCV( aRGB )
     
     dim as float _
-      Y = dot( aRGB, HCYweights ), _
-      Z = dot( hueToRGB( HCV.x ), HCYweights )
-      
-      if( Y < Z ) then
-        HCV.y *= Z / ( Epsilon + Y )
-      else
-        HCV.y *= ( 1.0 - Z ) / ( Epsilon + 1.0 - Y )
-      end if
-      
-      return( float3( HCV.x, HCV.y, Y ) )
+      Y = dot( aRGB, _HCYweights ), _
+      Z = dot( hueToRGB( HCV.x ), _HCYweights )
+    
+    if( Y < Z ) then
+      HCV.y *= Z / ( Epsilon + Y )
+    else
+      HCV.y *= ( 1.0 - Z ) / ( Epsilon + 1.0 - Y )
+    end if
+    
+    return( float3( HCV.x, HCV.y, Y ) )
   end function
   
   '' Converting RGB to Hue-Saturation-Value
@@ -369,11 +347,8 @@ namespace Colors
       c1.w + ( ( c2.w - c1.w ) * t ) ) )
   end function
   
-  '' Just for clarity
-  type as Colors.float3 _
-    HSVColor, HSLColor, HCYColor
-  type as Colors.float4 _
-    HSVAColor, HSLAColor, HCYAColor
+  type as Colors.float3 HSVColor, HSLColor, HCYColor
+  type as Colors.float4 HSVAColor, HSLAColor, HCYAColor
 end namespace
 
 #endif
